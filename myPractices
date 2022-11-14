@@ -1,0 +1,222 @@
+import java.util.*;
+import java.text.SimpleDateFormat;  
+import java.util.Date;   
+
+class Children{
+	private String name;
+	private int age;
+	private double height;
+	private double weight;
+	private double bmi; 
+	
+	Children (String name, int age, double height, double weight, double bmi){
+		this.name = name;
+		this.age = age;
+		this.height = height;
+		this.weight = weight;
+		this.bmi = bmi; 
+	}
+public int age(){
+      return age;
+   }
+public double height(){
+      return height;
+   }
+public double weight(){
+      return weight;
+   }
+public String name(){
+      return name;
+   }
+public double bmi(){
+	   return bmi;
+	}
+public String toString(){
+      return name+"\t\t "+age+"\t "+height+"\t "+weight+"\t "+bmi;
+   }
+}
+
+class Main{
+	public static void main(String[] args) {
+		  
+      	ArrayList<Children> child = new ArrayList<Children>();
+	  	SimpleDateFormat formatter = new SimpleDateFormat("\t\t\t\t\t\tdd/MM/yyyy HH:mm:ss");  
+      	try (Scanner s = new Scanner(System.in)) {
+		try (Scanner s1 = new Scanner(System.in)) {
+		try (Scanner d = new Scanner(System.in)) {
+		try (Scanner input = new Scanner(System.in)) {
+		try (Scanner b = new Scanner (System.in)) {
+		int ch;
+		char ur;
+		double height=0;
+		double weight=0;
+		double bmi = 0;
+
+		do{
+			System.out.println("A. HEALTHCARE");
+			System.out.println("B. PARENTS");
+			System.out.println("C. EXIT");
+			System.out.print("Enter your Choice: ");
+			ur = d.next().charAt(0);;
+							 
+			switch(ur){
+				case 'A': 
+					String user_name, password; 
+					System.out.println("\t=======HEALTHCARE LOGIN=======");
+					Date date = new Date();  
+					System.out.println(formatter.format(date)); 
+					System.out.print("Enter Username: ");
+					user_name = input.nextLine();
+					System.out.print("Enter Password: ");
+					password = input.nextLine();		
+								
+					if(user_name.equals("care") && (password.equals("pass"))){
+						System.out.println("\n\t******WELCOME******");
+						System.out.println("1.CREATE");
+						System.out.println("2.DISPLAY");
+						System.out.println("3.SEARCH");
+						System.out.println("4.UPDATE");
+						System.out.println("5.DELETE");
+						System.out.println("6.BACK");
+						System.out.print("Enter Your Choice: ");
+						ch = s.nextInt();	
+									
+							switch(ch){
+								case 1:
+									System.out.print("Children Name : ");
+									String name = s1.nextLine();
+									System.out.print("Age : ");
+									int age = s.nextInt();
+									System.out.print("Height(Meters) : ");
+									height = b.nextDouble();
+									System.out.print("Weight(Kilograms) : ");
+									weight = b.nextDouble();
+
+										bmi = weight / (height * height);
+										if (bmi < 18.5) {
+										System.out.println("Underweight");}
+										else if (bmi < 25) {
+										System.out.println("Normal");}
+										else if (bmi < 30) {
+										System.out.println("Overweight");}
+										else {
+										System.out.println("Obese");}
+
+									child.add(new Children(name,age,height,weight,bmi));
+								break;	
+								case 2:
+									System.out.println("\t\t\t\tChildren Records");
+									System.out.println("------------------------------------------------------------------------------------------------");
+									Iterator<Children> i = child.iterator();
+									while(i.hasNext()){
+									Children c = i.next(); 
+									System.out.println("\n"+c);
+
+										bmi = weight / (height * height);
+										if (bmi < 18.5) {
+										System.out.println("Underweight");}
+										else if (bmi < 25) {
+										System.out.println("Normal");}
+										else if (bmi < 30) {
+										System.out.println("Overweight");}
+										else {
+										System.out.println("Obese");}
+										}
+										System.out.println("------------------------------------------------------------------------------------------------");
+								break;
+								case 3:
+									boolean found = false;
+									System.out.print("Enter age to Search :");
+									age = s.nextInt();
+									System.out.println("------------------------------------------------------------------------------------------------");
+									i = child.iterator();
+									while(i.hasNext()){
+									Children c= i.next();
+
+										if(c.age() == age)  {
+						                System.out.print(c);
+						                found = true;}}
+										if(!found){
+										System.out.println("Record Not Found");}
+										System.out.println("------------------------------------------------------------------------------------------------");
+								break;
+								case 4:
+									found = false;
+									System.out.print("Enter age to Update :");
+									age = s.nextInt();
+						           
+										ListIterator<Children>li = child.listIterator();
+										while(li.hasNext()){
+										Children c = li.next();
+										if(c.age() == age)  {
+						                
+									System.out.println("Children Name : ");
+									name = s1.nextLine();
+									System.out.println("Age : ");
+									age = s.nextInt();
+									System.out.println("Height(Meters) : ");
+									height = b.nextDouble();
+									System.out.println("Weight(Kilograms) : ");
+									weight = b.nextDouble();
+										
+						                li.set(new Children(name,age,height,weight,bmi));
+						                found = true;}}
+										if(!found){
+										System.out.println("Record Not Found");}
+										else{
+										System.out.println("Record is Updated Successfully...!");}   
+								break;
+								case 5:
+										found = false;
+										System.out.print("Enter age to Delete :");
+										age = s.nextInt();
+										System.out.println("------------------------------------------------------------------------------------------------");
+										i = child.iterator();
+										while(i.hasNext()){
+										Children c = i.next();
+										if(c.age() == age)  {
+						                i.remove();
+						                found = true;}} 
+										if(!found){
+										System.out.println("Record Not Found");}
+										else{
+										System.out.println("Record is Deleted Successfully...!");}
+										System.out.println("------------------------------------------------------------------------------------------------");
+								break;
+								case 6:
+								break;
+									}
+								}
+							else{
+								System.out.println("Invalid password or username");}
+							break;
+							case 'B':
+								System.out.println("\t=======PARENTS=======");
+								System.out.println("\t\t\t\tChildren Records");
+										System.out.println("------------------------------------------------------------------------------------------------");
+										Iterator<Children> i = child.iterator();
+										while(i.hasNext()){
+										Children c = i.next(); 
+										System.out.println("\n"+c);
+										bmi = weight / (height * height);
+										if (bmi < 18.5) {
+										System.out.println("Remarks: Underweight");}
+										else if (bmi < 25) {
+										System.out.println("Remarks: Normal");}
+										else if (bmi < 30) {
+										System.out.println("Remarks: Overweight");}
+										else {
+										System.out.println("Remarks: Obese");}}
+										System.out.println("------------------------------------------------------------------------------------------------");
+							break;
+							case 'C':
+									return;
+							}
+						}while(ur!=0);
+					}
+				}
+			}
+		}
+	}
+}
+}
