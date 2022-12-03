@@ -1,0 +1,380 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
+import java.io.FileWriter;
+import java.io.FileReader;
+import java.io.BufferedWriter;
+import java.io.BufferedReader;
+import java.io.PrintWriter;
+import java.io.IOException;
+
+import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+
+public class Main {
+	public static void main(String[] args) {
+		LoginSystem loginSystem=new LoginSystem();
+
+		loginSystem.login();
+		
+		HealthCareSystem healthCareSystem = new HealthCareSystem();
+
+		healthCareSystem.doMainMenu();
+	}
+}
+
+
+class LoginSystem {
+
+	final String USERNAME = "care";
+	final String PASSWORD = "pass";
+
+	Scanner scanner = new Scanner(System.in);
+
+	public void login() {
+		boolean quit=false; 
+
+		while(!quit) {
+            System.out.println("===================================="+
+                                        "\n\t\tLogin"+
+                               "\n====================================");
+			System.out.print("\tUsername: ");
+			String username=scanner.nextLine();
+
+			System.out.print("\tPassword: ");
+			String password=scanner.nextLine();
+
+			if(	username.equals(USERNAME) &&
+					password.equals(PASSWORD)) {
+				System.out.println("\n\tAccess Granted");
+                System.out.println("====================================");
+				quit=true;
+			} 
+			else {
+				System.out.println("\tAccess Denied");
+                System.out.println("====================================");
+			}
+
+		}
+
+	}
+
+}
+
+class Patient {
+	public String firstName,middleName,lastName;
+	public String birth;
+	public double height,weight;
+	public String registeredAt;
+}
+
+class HealthCareSystem {
+
+	static final String DATABASE_FILE = "database.txt";
+	static Scanner scanner = new Scanner(System.in); 
+	 
+	void doMainMenu() {
+		boolean quit=false;
+		while(!quit) {
+			System.out.print(
+            "\n\tHEALTHCARE MENU"+
+  			"\n\n1. Add Patient Record\n"+
+				"2. Search Patient Record\n"+
+				"3. Update Patient Record\n"+
+				"4. Delete Patient Record\n"+
+	 			"5. Get Patient BMI Record\n"+
+				"0. Exit\n"+
+				"Choice: "
+			);
+			int choice=scanner.nextInt();
+			scanner.nextLine();
+			switch(choice) {
+			case 0: quit=true; break;
+			case 1: doCreatePatientRecord(); break;				
+			case 2: doSearchPatientRecord(); break;				
+			case 3: doUpdatePatientRecord(); break;				
+			case 4: doDeletePatientRecord(); break;				
+			case 5: doGetPatientBMIRecord(); break;				
+			}
+		}
+	}
+
+	void doCreatePatientRecord() {
+		Patient patient = new Patient();
+		System.out.print("\nFirstname: ");	
+		patient.firstName=scanner.nextLine();
+		System.out.print("Middlename: ");	
+		patient.middleName=scanner.nextLine();
+		System.out.print("Lastname: ");	
+		patient.lastName=scanner.nextLine();
+
+    boolean again=false;
+    do {
+  		System.out.print("Birthdate (YYYY-MM-DD): ");	
+  		patient.birth=scanner.nextLine();
+      try {
+        DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("yyyy-MM-dd");    
+        LocalDate.parse(patient.birth, myFormatObj);
+        again=false;
+      } catch (DateTimeParseException e) {
+        System.out.println("\tInvalid date.");
+        again=true;
+      }
+    } while(again);
+
+
+		System.out.print("Height(in meters): ");	
+		patient.height=scanner.nextDouble(); scanner.nextLine();
+		System.out.print("Weight(in kilograms): ");	
+		patient.weight=scanner.nextDouble(); scanner.nextLine();
+        System.out.print("\n\tRecord Created\n");	
+
+    LocalDateTime myDateObj = LocalDateTime.now();
+    DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("yyyy-MM-dd h:mm:ss a");
+    String registeredAt = myDateObj.format(myFormatObj);
+
+    patient.registeredAt=registeredAt;
+
+		try(
+				FileWriter fw = new FileWriter(DATABASE_FILE, true);
+				BufferedWriter bw = new BufferedWriter(fw);
+			  PrintWriter pw = new PrintWriter(bw)) {
+
+			pw.println(
+				patient.firstName+"/"+
+				patient.middleName+"/"+
+				patient.lastName+"/"+
+				patient.birth+"/"+
+				patient.height+"/"+
+				patient.weight+"/"+
+				patient.registeredAt
+			);
+
+		} catch(IOException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	void doSearchPatientRecord() {
+		System.out.print("\nEnter Text To Search Record: ");
+		String search=scanner.nextLine();
+	 	try(BufferedReader br = new BufferedReader(new FileReader(DATABASE_FILE))) {
+			String line;
+			String[] patterns=search.split("\\s+"); 
+			int j=0;
+			boolean notFound=true;
+		  while((line=br.readLine())!=null) {
+				j++;
+				boolean found=false;
+				for(String pattern: patterns) {
+					if(line.toUpperCase().indexOf(pattern.toUpperCase())!=-1) {
+						found=true;
+						notFound=false;
+						break;
+					}
+				}
+				if(found) {
+					String[] r=line.split("/");
+					System.out.println("\nRecord Number: "+j);
+					System.out.println("Firstname: "+r[0]);
+					System.out.println("Middlename: "+r[1]);
+					System.out.println("Lastname: "+r[2]);
+					System.out.println("Birthdate: "+r[3]);
+					System.out.println("Height: "+r[4]);
+					System.out.println("Weight: "+r[5]);		
+					System.out.println("Registered At: "+r[6]);		
+					System.out.println();
+				}
+		  }
+		  if(notFound) {
+		  	System.out.println("\tRecord not found.");
+		  }
+		} catch(IOException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	void doUpdatePatientRecord() {
+		System.out.print("\nRecord Number: ");
+		int recordNumber=scanner.nextInt(); scanner.nextLine();
+	 	try(BufferedReader br = new BufferedReader(new FileReader(DATABASE_FILE))) {
+	 		ArrayList<String> al=new ArrayList<>();
+			String line;
+			boolean found=false;
+			int j=0;
+		  while((line=br.readLine())!=null) {
+				j++;
+				if(j==recordNumber) {
+					found=true;
+					String[] r=line.split("/");
+
+					System.out.println("Record Found:\n");	
+					System.out.println("Record Number: "+j);
+					System.out.println("Firstname: "+r[0]);
+					System.out.println("Middlename: "+r[1]);
+					System.out.println("Lastname: "+r[2]);
+					System.out.println("Birthdate: "+r[3]);
+					System.out.println("Height: "+r[4]);
+					System.out.println("Weight: "+r[5]);		
+					System.out.println("Registered At: "+r[6]);		
+					System.out.println();
+
+					Patient patient = new Patient();
+										
+					System.out.print("Update Patient Record:\n");	
+
+					System.out.print("Firstname: ");	
+					patient.firstName=scanner.nextLine();
+					System.out.print("Middlename: ");	
+					patient.middleName=scanner.nextLine();
+					System.out.print("Lastname: ");	
+					patient.lastName=scanner.nextLine();
+
+          boolean again=false;
+          do {
+        		System.out.print("Birthdate (YYYY-MM-DD): ");	
+        		patient.birth=scanner.nextLine();
+            try {
+              DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("yyyy-MM-dd");    
+              LocalDate.parse(patient.birth, myFormatObj);
+              again=false;
+            } catch (DateTimeParseException e) {
+              System.out.println("Invalid date.");
+              again=true;
+            }
+          } while(again);
+
+					System.out.print("Height(in meters): ");	
+					patient.height=scanner.nextDouble(); scanner.nextLine();
+					System.out.print("Weight(in kilograms): ");	
+					patient.weight=scanner.nextDouble(); scanner.nextLine();
+					al.add(				
+						patient.firstName+"/"+
+						patient.middleName+"/"+
+						patient.lastName+"/"+
+						patient.birth+"/"+
+						patient.height+"/"+
+						patient.weight+"/"+
+						r[6]
+					);
+				} else {
+					al.add(line);
+				}
+		  }
+			if(found) {
+				try(
+						FileWriter fw = new FileWriter(DATABASE_FILE,false);
+						BufferedWriter bw = new BufferedWriter(fw);
+					  PrintWriter pw = new PrintWriter(bw)) {
+
+					for(int i=0;i<al.size();i++) {
+						pw.println(al.get(i));
+					}
+
+					System.out.println("\tRecord updated.");
+
+				} catch(IOException e) {
+					System.out.println(e.getMessage());
+				}			
+			} else {
+				System.out.println("\tRecord not found.");
+			}
+		} catch(IOException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	void doDeletePatientRecord() {
+		System.out.print("\nRecord Number: ");
+		int recordNumber=scanner.nextInt(); scanner.nextLine();
+	 	try(BufferedReader br = new BufferedReader(new FileReader(DATABASE_FILE))) {
+	 		ArrayList<String> al=new ArrayList<>();
+			String line;
+			boolean found=false;
+			int j=0;
+		  while((line=br.readLine())!=null) {
+				j++;
+				if(j==recordNumber) {
+					found=true;
+				} else {
+					al.add(line);
+				}
+		  }
+			if(found) {
+				try(
+						FileWriter fw = new FileWriter(DATABASE_FILE,false);
+						BufferedWriter bw = new BufferedWriter(fw);
+					  PrintWriter pw = new PrintWriter(bw)) {
+
+					for(int i=0;i<al.size();i++) {
+						pw.println(al.get(i));
+					}
+					
+					System.out.println("\tRecord deleted.");
+
+				} catch(IOException e) {
+					System.out.println(e.getMessage());
+				}			
+			} else {
+				System.out.println("\tRecord not found.");
+			}
+		} catch(IOException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	void doGetPatientBMIRecord() {
+		System.out.print("\nRecord Number: ");
+		int recordNumber=scanner.nextInt(); scanner.nextLine();
+	 	try(BufferedReader br = new BufferedReader(new FileReader(DATABASE_FILE))) {
+	 		ArrayList<String> al=new ArrayList<>();
+			String line;
+			boolean found=false;
+			int j=0;
+		  while((line=br.readLine())!=null) {
+				j++;
+				if(j==recordNumber) {
+					found=true;
+					String[] r=line.split("/");
+
+					System.out.println("Record Found:\n");	
+					System.out.println("Record Number: "+j);
+					System.out.println("Firstname: "+r[0]);
+					System.out.println("Middlename: "+r[1]);
+					System.out.println("Lastname: "+r[2]);
+					System.out.println("Birthdate: "+r[3]);
+					System.out.println("Height: "+r[4]);
+					System.out.println("Weight: "+r[5]);		
+					System.out.println("Registred At: "+r[6]);		
+					System.out.println();
+
+					double height=Double.valueOf(r[4]);
+					double weight=Double.valueOf(r[5]);
+					
+					double bmi=weight/(height*height);
+
+					String result="";
+
+					if(bmi<18.5) result="Underweight";
+					else if(bmi<25) result="Normal";
+					else if(bmi<30) result="Overweight";									
+					else result="Obesity";
+
+					System.out.printf("BMI: %.2f\n",bmi);
+					System.out.println("Remark: "+result);
+					
+					break;
+				}
+			}
+			if(!found) {
+				System.out.println("\tRecord not found.");
+			}
+		} catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+
+}
